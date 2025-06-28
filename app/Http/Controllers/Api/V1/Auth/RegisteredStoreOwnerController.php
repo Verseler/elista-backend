@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Auth\StoreStoreOwnerRequest;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class RegisteredStoreOwnerController extends Controller
@@ -20,25 +22,46 @@ class RegisteredStoreOwnerController extends Controller
     public function store(StoreStoreOwnerRequest $request): JsonResponse
     {
         $validated = $request->validated();
+        $role = 'store_owner';
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'password' => Hash::make($request->string('password')),
-        ]);
+        try {
+            $user = DB::transaction(function () use ($validated, $role): User {
+                $store = Store::create([
+                    'name' => $validated['store_name'],
+                    'image' => $validated['store_image'] ?? null,
+                    'location' => $validated['store_location'] ?? null,
+                ]);
 
-        $user->assignRole('store_owner');
+                $newUser = User::create([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'] ?? null,
+                    'phone' => $validated['phone'] ?? null,
+                    'store_id' => $store->id,
+                    'password' => Hash::make($validated['password'])
+                ]);
+                $newUser->assignRole($role);
+                $newUser->role = $role;
 
-        $token = $user->createToken('basic');
+                event(new Registered($newUser));
 
-        event(new Registered($user));
+                Auth::login($newUser);
 
-        Auth::login($user);
+                return $newUser;
+            });
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token->plainTextToken
-        ]);
+            $token = $user->createToken('basic');
+
+            return response()->json([
+                'user' => $user,
+                'token' => $token->plainTextToken
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
+
