@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\BorrowerController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
-
+    Route::get('borrowers', [BorrowerController::class, 'index']);
+    Route::get("borrowers/{api}", [BorrowerController::class, 'show']);
 });
 
 
