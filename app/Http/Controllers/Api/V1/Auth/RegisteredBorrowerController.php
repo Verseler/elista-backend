@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\StoreBorrowerRequest;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class RegisteredBorrowerController extends Controller
 {
@@ -18,24 +16,21 @@ class RegisteredBorrowerController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreBorrowerRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'phone', 'size:10', 'regex:/(9)[0-9]{9}/'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        $validated = $request->validated();
+        $storeId = Auth::user()->store_id;
+        $role = 'borrower';
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone ?? null,
-            'store_id' => $request->store_id,
-            'password' => Hash::make($request->string('password')),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'store_id' => $storeId,
+            'password' => Hash::make($validated['password']),
         ]);
-
-        $user->assignRole('borrower');
+        $user->role = $role;
+        $user->assignRole($role);
 
         $token = $user->createToken('basic');
 
