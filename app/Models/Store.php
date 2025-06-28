@@ -25,4 +25,17 @@ class Store extends Model
     {
         return $this->hasMany(User::class)->role('borrower');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function lentItems()
+    {
+        return $this->hasManyThrough(
+            Item::class,
+            Transaction::class
+        );
+    }
 }
