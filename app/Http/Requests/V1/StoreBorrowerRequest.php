@@ -1,18 +1,22 @@
 <?php
 
-namespace App\Http\Requests\V1\Auth;
+namespace App\Http\Requests\V1;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-class StoreStoreOwnerRequest extends FormRequest
+class StoreBorrowerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return request()->user()->can(
+            'create',
+            User::class
+        );
     }
 
     /**
@@ -25,11 +29,8 @@ class StoreStoreOwnerRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255', 'unique:users,name'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string',  'size:11', 'regex:/(09)[0-9]{9}/'],
-            'store_name' => ['required', 'string'],
-            'store_image' => ['nullable', 'string'],
-            'store_location' => ['nullable', 'string'],
-            'password' => ['required', 'string', 'confirmed', Password::defaults()],
+            'phone' => ['nullable', 'string', 'size:11', 'regex:/(09)[0-9]{9}/'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }
 
