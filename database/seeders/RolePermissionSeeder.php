@@ -19,8 +19,10 @@ class RolePermissionSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'create transactions']);
         Permission::firstOrCreate(['name' => 'create items']);
         Permission::firstOrCreate(['name' => 'record payments']);
+        Permission::firstOrCreate(['name' => 'create borrower']);
         Permission::firstOrCreate(['name' => 'edit borrowers password']);
         Permission::firstOrCreate(['name' => 'view dashboard']);
+        Permission::firstOrCreate(['name' => 'view borrowers']);
         Permission::firstOrCreate(['name' => 'view borrower lent items']);
         Permission::firstOrCreate(['name' => 'view own lent items']);
 
@@ -35,13 +37,16 @@ class RolePermissionSeeder extends Seeder
             'create transactions',
             'create items',
             'record payments',
+            'create borrower',
             'edit borrowers password',
             'view dashboard',
+            'view borrowers',
             'view borrower lent items'
         ]);
 
         $borrower->givePermissionTo([
             'view own lent items',
+            'view borrower lent items'
         ]);
     }
 }
