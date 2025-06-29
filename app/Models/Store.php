@@ -12,7 +12,6 @@ class Store extends Model
 
     protected $fillable = [
         'name',
-        'image',
         'location'
     ];
 
