@@ -29,8 +29,9 @@ class RegisteredBorrowerController extends Controller
             'store_id' => $storeId,
             'password' => Hash::make($validated['password']),
         ]);
-        $user->role = $role;
+        $user->store;
         $user->assignRole($role);
+        $user->role = $role;
 
         $token = $user->createToken('basic');
 

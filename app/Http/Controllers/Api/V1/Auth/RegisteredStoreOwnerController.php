@@ -39,6 +39,7 @@ class RegisteredStoreOwnerController extends Controller
                     'store_id' => $store->id,
                     'password' => Hash::make($validated['password'])
                 ]);
+                $newUser->store;
                 $newUser->assignRole($role);
                 $newUser->role = $role;
 
