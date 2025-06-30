@@ -45,7 +45,7 @@ class BorrowerController extends Controller
      */
     public function show(string $id, BorrowerFinanceService $service)
     {
-        $borrower = User::with(['transactions.items', 'roles'])
+        $borrower = User::with(['transactions.items', 'roles', 'payments'])
             ->findOrFail($id);
 
         if (!$borrower->hasRole('borrower')) {
